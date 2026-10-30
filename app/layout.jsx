@@ -1,0 +1,1 @@
+import "./globals.css";export const metadata={title:"Savdochi | B2B ulgurji savdo",description:"Ulgurji savdo platformasi"};export default function Layout({children}){return <html lang="uz"><body>{children}</body></html>}
