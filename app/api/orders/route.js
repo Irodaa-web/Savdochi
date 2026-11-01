@@ -27,7 +27,7 @@ export async function POST(req){let session;try{
       if(!Number.isSafeInteger(total)||!Number.isSafeInteger(group.total+total))throw new AppError('Buyurtma summasi juda katta');
       group.items.push({productId:p._id,name:p.name,unit:p.unit,price:p.price,quantity:item.quantity});group.total+=total;
     }
-    result=await Order.create([...groups.values()],{session});
+    result=await Order.create([...groups.values()],{session,ordered:true});
   });
   return NextResponse.json({orders:result.map(orderJSON)},{status:201});
 }catch(e){return fail(e);}finally{await session?.endSession();}}
