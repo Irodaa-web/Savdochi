@@ -13,11 +13,12 @@ MongoDB must support transactions (Atlas or a replica set). Existing users are p
 ## MVP
 
 - Cookie login and buyer/seller roles.
+- Client navigation preserves the mounted app and drafts, with no redundant server navigation or loading-screen flashes. Concurrent GETs are deduplicated and bounded by a timeout.
 - URL-based navigation with browser Back/Forward, refreshable product links and catalog filters preserved in query parameters.
 - Public catalog with category, supplier and text filters.
 - Seller-owned product create/edit/archive, unit price, available stock and minimum quantity.
 - Account-based server cart: stock is reserved for 72 hours when added, edits retain the original deadline, removal releases stock. Guests sign in before reserving.
-- Expired holds are returned transactionally before inventory/cart reads and writes; no cron or destructive TTL index is required. Open panels refresh every 30 seconds.
+- Expired holds are returned transactionally before inventory/cart reads and writes; no cron or destructive TTL index is required. Visible inventory/order panels refresh quietly every 5 seconds after the previous request completes; chat messages check every 2 seconds. Hidden tabs pause, focus/reconnect refreshes immediately.
 - Checkout consumes existing holds without deducting stock again; cancellation restores stock once.
 - Direct quantity entry with stock/minimum validation and address/phone checkout.
 - Optional Leaflet delivery map with device geolocation, click-to-select and manual coordinates.
