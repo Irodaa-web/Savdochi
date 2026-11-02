@@ -16,11 +16,14 @@ MongoDB must support transactions (Atlas or a replica set). Existing users are p
 - URL-based navigation with browser Back/Forward, refreshable product links and catalog filters preserved in query parameters.
 - Public catalog with category, supplier and text filters.
 - Seller-owned product create/edit/archive, unit price, available stock and minimum quantity.
-- Browser-persisted cart, direct quantity entry with stock/minimum validation, and address/phone checkout.
+- Account-based server cart: stock is reserved for 72 hours when added, edits retain the original deadline, removal releases stock. Guests sign in before reserving.
+- Expired holds are returned transactionally before inventory/cart reads and writes; no cron or destructive TTL index is required. Open panels refresh every 30 seconds.
+- Checkout consumes existing holds without deducting stock again; cancellation restores stock once.
+- Direct quantity entry with stock/minimum validation and address/phone checkout.
 - Optional Leaflet delivery map with device geolocation, click-to-select and manual coordinates.
 - Partner directory built from orders and conversations.
 - Private buyer–seller business chat with retry deduplication, older-message pagination and periodic refresh.
-- Atomic multi-seller checkout: authoritative database prices, stock reservation and idempotent request IDs.
+- Atomic multi-seller checkout: authoritative database prices, reservation consumption and idempotent request IDs.
 - Seller statuses: pending → confirmed → shipped → delivered; cancellation before shipping restores stock once.
 - Buyer cancellation while pending and private order history. Order item snapshots survive product edits/deletion.
 

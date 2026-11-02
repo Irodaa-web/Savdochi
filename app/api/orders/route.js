@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import {NextResponse} from 'next/server';
-import {Product,Order} from '@/lib/models';
+import {Product,Order,Reservation,User} from '@/lib/models';
 import {requireUser,checkOrigin,fail,orderJSON} from '@/lib/api';
 import {AppError,checkoutInput} from '@/lib/commerce.mjs';
+import {releaseExpired} from '@/lib/reservations';
 export const dynamic='force-dynamic';
 export async function GET(){try{
   const user=await requireUser();
@@ -11,15 +12,20 @@ export async function GET(){try{
 }catch(e){return fail(e);}}
 export async function POST(req){let session;try{
   checkOrigin(req);const user=await requireUser('buyer');const data=checkoutInput(await req.json());
+  await releaseExpired();
   // The unique index and transaction make retries safe, including multi-seller baskets.
   await Promise.all([Order.init(),Product.init()]);
   session=await mongoose.startSession();let result;
   await session.withTransaction(async()=>{
+    await User.updateOne({_id:user._id},{$inc:{cartVersion:1}},{session});
     const existing=await Order.find({buyer:user._id,requestId:data.requestId}).session(session);
     if(existing.length){result=existing;return;}
     const groups=new Map();
     for(const item of data.items){
-      const p=await Product.findOneAndUpdate({_id:item.productId,active:true,stock:{$gte:item.quantity},minOrder:{$lte:item.quantity}},{$inc:{stock:-item.quantity}},{new:true,session});
+      const hold=await Reservation.findOne({buyer:user._id,product:item.productId,quantity:item.quantity,expiresAt:{$gt:new Date()}}).session(session);
+      if(!hold)throw new AppError('Savatdagi band qilish muddati tugagan yoki miqdor o‘zgargan. Savatni yangilang.',409);
+      const p=await Product.findOne({_id:item.productId,active:true,minOrder:{$lte:item.quantity}}).session(session);
+      await Reservation.deleteOne({_id:hold._id},{session});
       if(!p) throw new AppError('Mahsulot mavjud emas, qoldiq yetmaydi yoki minimal miqdor bajarilmagan. Savatni yangilang.',409);
       const key=String(p.seller);
       if(!groups.has(key))groups.set(key,{buyer:user._id,buyerName:user.name,seller:p.seller,supplier:p.supplier,requestId:data.requestId,phone:data.phone,address:data.address,note:data.note,location:data.location,items:[],total:0});
