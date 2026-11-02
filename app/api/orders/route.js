@@ -22,7 +22,7 @@ export async function POST(req){let session;try{
       const p=await Product.findOneAndUpdate({_id:item.productId,active:true,stock:{$gte:item.quantity},minOrder:{$lte:item.quantity}},{$inc:{stock:-item.quantity}},{new:true,session});
       if(!p) throw new AppError('Mahsulot mavjud emas, qoldiq yetmaydi yoki minimal miqdor bajarilmagan. Savatni yangilang.',409);
       const key=String(p.seller);
-      if(!groups.has(key))groups.set(key,{buyer:user._id,buyerName:user.name,seller:p.seller,supplier:p.supplier,requestId:data.requestId,phone:data.phone,address:data.address,note:data.note,items:[],total:0});
+      if(!groups.has(key))groups.set(key,{buyer:user._id,buyerName:user.name,seller:p.seller,supplier:p.supplier,requestId:data.requestId,phone:data.phone,address:data.address,note:data.note,location:data.location,items:[],total:0});
       const group=groups.get(key);const total=p.price*item.quantity;
       if(!Number.isSafeInteger(total)||!Number.isSafeInteger(group.total+total))throw new AppError('Buyurtma summasi juda katta');
       group.items.push({productId:p._id,name:p.name,unit:p.unit,price:p.price,quantity:item.quantity});group.total+=total;

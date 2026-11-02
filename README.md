@@ -15,12 +15,15 @@ MongoDB must support transactions (Atlas or a replica set). Existing users are p
 - Cookie login and buyer/seller roles.
 - Public catalog with category, supplier and text filters.
 - Seller-owned product create/edit/archive, unit price, available stock and minimum quantity.
-- Browser-persisted cart, quantity controls and address/phone checkout.
+- Browser-persisted cart, direct quantity entry with stock/minimum validation, and address/phone checkout.
+- Optional Leaflet delivery map with device geolocation, click-to-select and manual coordinates.
+- Partner directory built from orders and conversations.
+- Private buyer–seller business chat with retry deduplication, older-message pagination and periodic refresh.
 - Atomic multi-seller checkout: authoritative database prices, stock reservation and idempotent request IDs.
 - Seller statuses: pending → confirmed → shipped → delivered; cancellation before shipping restores stock once.
 - Buyer cancellation while pending and private order history. Order item snapshots survive product edits/deletion.
 
-Stock shown in the seller form is available stock, excluding already reserved orders. Removing a product archives it. Payment and delivery are agreed directly with the seller; online payments and chat are not implemented.
+Stock shown in the seller form is available stock, excluding already reserved orders. Removing a product archives it. Payment and delivery are agreed directly with the seller; online payments are not implemented. Device location requires HTTPS and browser permission; manual map selection remains available.
 
 ## Verification
 

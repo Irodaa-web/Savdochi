@@ -28,3 +28,18 @@ test('Buyer can only cancel a pending order; terminal states never transition',(
  assert.throws(()=>nextStatus('delivered','cancelled','seller'));
  assert.equal(nextStatus('confirmed','shipped','seller'),'shipped');
 });
+
+test('Delivery coordinates are optional, finite and in geographical bounds',async()=>{
+ const {locationInput}=await import('../lib/commerce.mjs');
+ assert.equal(locationInput(undefined),null);
+ assert.deepEqual(locationInput({lat:41.311,lng:69.279,extra:'ignored'}),{lat:41.311,lng:69.279});
+ for(const p of [{lat:91,lng:0},{lat:0,lng:181},{lat:'41',lng:69},{lat:NaN,lng:0},{lat:0,lng:Infinity}])assert.throws(()=>locationInput(p));
+ assert.deepEqual(checkoutInput({...order,location:{lat:0,lng:0}}).location,{lat:0,lng:0});
+});
+test('Business messages validate content and retry identifiers',async()=>{
+ const {messageInput}=await import('../lib/commerce.mjs');
+ assert.equal(messageInput({text:'  Salom  ',clientId:'test-message-123456'}).text,'Salom');
+ assert.throws(()=>messageInput({text:'   ',clientId:'test-message-123456'}));
+ assert.throws(()=>messageInput({text:'a'.repeat(2001),clientId:'test-message-123456'}));
+ assert.throws(()=>messageInput({text:'Salom',clientId:'x'}));
+});
