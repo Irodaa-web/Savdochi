@@ -13,6 +13,7 @@ MongoDB must support transactions (Atlas or a replica set). Existing users are p
 ## MVP
 
 - Cookie login and buyer/seller roles.
+- URL-based navigation with browser Back/Forward, refreshable product links and catalog filters preserved in query parameters.
 - Public catalog with category, supplier and text filters.
 - Seller-owned product create/edit/archive, unit price, available stock and minimum quantity.
 - Browser-persisted cart, direct quantity entry with stock/minimum validation, and address/phone checkout.
