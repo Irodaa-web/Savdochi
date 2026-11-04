@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {readFile} from 'node:fs/promises';
+import {sameMarket,marketFilter,requirePersonalAccount} from '../lib/demo-access.mjs';
+test('Demo and real commerce cannot cross; legacy users remain real',()=>{assert.doesNotThrow(()=>sameMarket({isDemo:true},{isDemo:true}));assert.doesNotThrow(()=>sameMarket({},{}));assert.throws(()=>sameMarket({isDemo:true},{}));assert.throws(()=>sameMarket({},{isDemo:true}));assert.deepEqual(marketFilter(null),{isDemo:{$ne:true}});assert.throws(()=>requirePersonalAccount({isDemo:true}));});
+test('Global logout rejects old signed sessions and accepts fresh sessions',async()=>{const old=process.env.AUTH_SECRET;process.env.AUTH_SECRET='test-only-demo-session-secret';try{const source=await readFile(new URL('../lib/auth.js',import.meta.url),'utf8');const {createSession,verifySession}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));const payload=Buffer.from(JSON.stringify({id:'a'.repeat(24),role:'buyer',version:0,exp:Date.now()+60000})).toString('base64url');const signature=crypto.createHmac('sha256',process.env.AUTH_SECRET).update(payload).digest('base64url');assert.equal(verifySession(payload+'.'+signature),null);assert.equal(verifySession(createSession({_id:'a'.repeat(24),role:'buyer'})).role,'buyer');}finally{if(old===undefined)delete process.env.AUTH_SECRET;else process.env.AUTH_SECRET=old;}});

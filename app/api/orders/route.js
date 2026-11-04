@@ -1,3 +1,4 @@
+import {sameMarket} from '@/lib/demo-access.mjs';
 import mongoose from 'mongoose';
 import {NextResponse} from 'next/server';
 import {Product,Order,Reservation,User,Partnership} from '@/lib/models';
@@ -36,7 +37,7 @@ export async function POST(req){let session;try{
       group.items.push({productId:p._id,name:p.name,unit:p.unit,price,quantity:item.quantity});group.total+=total;
     }
     for(const g of groups.values()){
-      const seller=await User.findById(g.seller).select('name profile blocked').session(session);if(!seller||seller.blocked)throw new AppError('Yetkazib beruvchi faol emas',409);const profile=seller.profile||{};
+      const seller=await User.findById(g.seller).select('name profile blocked isDemo').session(session);if(!seller||seller.blocked)throw new AppError('Yetkazib beruvchi faol emas',409);sameMarket(user,seller);const profile=seller.profile||{};
       if(g.total<(profile.minOrderTotal||0))throw new AppError(seller.name+' uchun minimal buyurtma summasi: '+profile.minOrderTotal,409);
       if(profile.deliveryAreas?.length&&!profile.deliveryAreas.some(a=>a.toLowerCase()===region.toLowerCase()))throw new AppError('Kompaniya tanlangan hududga yetkazib bermaydi',409);
       if(profile.paymentMethods?.length&&!profile.paymentMethods.includes(paymentMethod))throw new AppError('Tanlangan to‘lov usuli kompaniyada mavjud emas',409);

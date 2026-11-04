@@ -58,3 +58,9 @@ Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` (without `@`) and a random `TE
 Existing data remains valid; additive fields have defaults. MongoDB replica-set transactions remain required. Do not delete expired reservations with a TTL index: inventory is released inside a transaction before inventory/cart operations. Configure a moderator before promising response times for support or verification. Test with pilot companies and shops before wider launch; live polling is not an offline or push-delivery guarantee.
 
 `SAVDOCHI_TEST_URL=<disposable deployment URL> SAVDOCHI_ALLOW_TEST_WRITES=1 python tests/business-integration.py` exercises profiles, partner acceptance/discounts, tier pricing, reservation limits, total validation, proposal stock conservation, chat unread/ownership, receipt/payment reports, repeat orders, support, import idempotency and one-time account recovery against the actual HTTP API. It creates synthetic accounts/orders and archives its test products afterward; use a disposable database for repeat CI runs.
+
+## Demo accounts and session rollout
+
+`/login?demo=seller` and `/login?demo=buyer` prepare two shared public demo accounts and prefill login inputs. Setup is idempotent and transactional: two role-specific profiles, three products, an accepted partnership and a chat. The demo banner identifies the active role; use fictional data only. Demo commerce is separated from real catalogs, reservations, orders and partner/chat requests. Demo accounts cannot change shared credentials, link personal Telegram accounts or request business verification.
+
+The session epoch in `lib/auth.js` invalidates all pre-rollout signed sessions once. Existing accounts and business data are retained; users can sign in again. Keep the epoch in future releases so old sessions remain invalid.
