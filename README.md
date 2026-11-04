@@ -35,3 +35,24 @@ Stock shown in the seller form is available stock, excluding already reserved or
 - `npm test` checks validation and allowed status transitions.
 - `npm run build` checks production compilation.
 - `SAVDOCHI_TEST_URL=<url> npm run test:integration` runs actual registration, product and order requests. **Use only a disposable database**: it creates test accounts/orders/products. It covers seller isolation, buyer permissions, transaction rollback, concurrent stock reservations, idempotent checkout, cancellation, price snapshots and session recovery.
+
+## Business workspace update
+
+- Role-specific overview and separate product, order, partner, reservation, report, notification, support and settings routes.
+- Company/store contact profiles; seller brands, delivery areas/days/lead time, fees/free threshold, minimum order value and payment methods. Checkout validates current terms and computes the total on the server.
+- Compressed product images served separately with cache headers, structured packaging, volume price tiers and accepted-partner discounts. Excel `.xlsx` imports use a template, validation preview, up to 50 rows and atomic, retry-safe creation.
+- Partnership requests with recipient acceptance/rejection; seller-defined discounts/terms for accepted partners. Existing trading contacts remain visible.
+- Seller reservation visibility and configurable per-shop quantity limits or partner-only reservations.
+- Order change proposals for reduced quantities, prices, fees and delivery dates; buyer accepts/rejects. Accepted reductions return the difference to stock. Order history, cancellation reasons, buyer receipt, manual payment reporting/confirmation and refund receipt tracking. This does not transfer money or verify bank payments.
+- Favorites and repeat orders. Reorders preserve existing cart quantities and explicitly report unavailable items.
+- In-app notifications, unread chat counts and order-linked messages; chat/notification refresh pauses while hidden. Reservation reminders appear when the buyer's notification feed is checked within six hours of expiry; no unattended scheduler is configured.
+- Recovery-code password reset, password changes invalidate other sessions, hashed database-backed authentication attempt limits. Users must first generate and securely save a recovery code in settings; email reset delivery is not configured.
+- Admin-only business verification, product archival endpoint and support replies. `ADMIN_EMAILS` must explicitly list the owner's **existing application account**; there is no public administrator signup or automatic privilege grant.
+
+### Optional Telegram activation
+
+Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` (without `@`) and a random `TELEGRAM_WEBHOOK_SECRET` in Vercel environment settings, then redeploy. Register the bot webhook at `APP_ORIGIN/api/telegram/webhook` using the same secret token through Telegram's `setWebhook` API. Never put tokens in source control, URLs shared with others, or chat. Users connect their own private chat using a ten-minute, one-time link in Settings. Notifications are delivered after committed application actions; temporary delivery failures remain pending for a later notification event. Telegram delivery is not a guaranteed scheduling service.
+
+### Rollout and operations
+
+Existing data remains valid; additive fields have defaults. MongoDB replica-set transactions remain required. Do not delete expired reservations with a TTL index: inventory is released inside a transaction before inventory/cart operations. Configure a moderator before promising response times for support or verification. Test with pilot companies and shops before wider launch; live polling is not an offline or push-delivery guarantee.
